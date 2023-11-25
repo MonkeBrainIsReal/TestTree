@@ -19,8 +19,28 @@ public:
     int data;
     Node* left;
     Node* right;
+    
+    
 };
 
+class Node2 
+{
+public:
+    Node2(int value, int key)
+    {
+        this->value = value;
+        this->key = key;
+        Left = nullptr;
+        Right = nullptr;
+        height = 0;
+    }
+    int value;
+    int key;
+    int height;
+    Node2* Left;
+    Node2* Right;
+   
+};
 
 class BinaryTree
 {
@@ -155,6 +175,57 @@ public:
         return isBinaryTree(root, INT_MIN, INT_MAX);
     }
 };
+
+
+class AVLTree 
+{
+private:
+    Node2* root;
+public:
+    AVLTree()
+    {
+        root = nullptr;
+    }
+
+
+    void CorrectHeight(Node2* node) {
+        int HeightLeft = GetSize(node->Left);
+        int HeightRight = GetSize(node->Right);
+        if (HeightLeft > HeightRight) {
+            node->height = HeightLeft + 1;
+        }
+        else
+            node->height = HeightRight + 1;
+    }
+
+    int BFactor(Node2* node) 
+    {
+        return GetSize(node->Right) - GetSize(node->Left);
+
+    }
+    int GetSize(Node2* node) 
+    {
+        if (!node) 
+        {
+            return 0;
+        }
+        return node->height;
+    }
+
+   /* Node2* balance(Node2* node) 
+    {
+        CorrectHeight(node);
+        if (BFactor(node) == 2) {
+            if (BFactor(node->Right) < 0) 
+            {
+                node->Right = rotateRight(node->Right);
+            } 
+            return rotateLeft(node);
+        }
+    }*/
+};
+
+
 
 int main()
 {
