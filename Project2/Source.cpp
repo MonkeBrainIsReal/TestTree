@@ -2,114 +2,157 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 
 using namespace std;
 
-struct node
+class Node
 {
+public:
+    Node(int data)
+    {
+        this->data = data;
+        left = nullptr;
+        right = nullptr;
+    }
     int data;
-    struct node* left;
-    struct node* right;
-
-    node(int data) : data(data), left(nullptr), right(nullptr) {}
+    Node* left;
+    Node* right;
 };
+
 
 class BinaryTree
 {
-
-    
+private:
+    Node* root;
 
 public:
-    node* root;
     BinaryTree()
     {
         root = nullptr;
     }
 
-    void add(int data) // Метод для вставки значения в дерево 
+    void insert(int x)
     {
-        root = AddRec(root,data);
-
+        root = InsertRec(root, x);
     }
 
-
-    node* AddRec(node* root,int val) // Рекурсивная функция для вставки значения в дерево 
+    Node* InsertRec(Node* node, int x)
     {
-        if (root == nullptr) {
-            return new node(val);
-        }
-        if (val < root->data) {
-            root->left = AddRec(root->left, val);
-        }
-        if (val > root->data) {
-            root->right = AddRec(root->right, val);
-        }
-        return root;
-    }
-
-
-    void ReadString(string& str)
-    {
-        istringstream iss(str);
-        BuildTreeRec(iss);
-    }
-
-
-    node* BuildTreeRec(istringstream& iss)
-    {
-        string token;
-        iss >> token;
-
-        if (token == "(") {
-            iss >> token;
-            int val = strToNum(token);
-            node* newNode = new node(val);
-
-            newNode->left = BuildTreeRec(iss);
-            newNode->right = BuildTreeRec(iss);
-
-            iss >> token;
-
-            return newNode;
-        }
-        else if (token == ")") {
-            return nullptr;
-        }
-        else {
-            int val = strToNum(token);
-            return new node(val);
-        }
-    }
-
-    int strToNum(const string& str)
-    {
-        int result = 0;
-        stringstream ss(str);
-        ss >> result;
-        return result;
-    }
-
-    void depthFirstSearch()
-    {
-        cout << "Depth-First Search:" << endl;
-        depthFirstSearchRec(root);
-        cout << endl;
-    }
-
-    void depthFirstSearchRec(node* current)
-    {
-        if (current != nullptr)
+        if (node == nullptr)
         {
-            // Рекурсивно обходим левое поддерево
-            depthFirstSearchRec(current->left);
-
-            // Выводим значение текущего узла
-            cout << current->data << " ";
-
-            // Рекурсивно обходим правое поддерево
-            depthFirstSearchRec(current->right);
+            return new Node(x); // всегда первым значением скрафтится корень
         }
+
+        if (x < node->data) // распихиваем по ветвям
+        {
+            node->left = InsertRec(node->left, x);
+        }
+        else if (x > node->data)
+        {
+            node->right = InsertRec(node->right, x);
+        }
+
+        return node;
+    }
+
+    bool isBinaryTree(Node* node, int minValue, int maxValue)
+    {
+        if (node == nullptr)
+        {
+            return true;
+        }
+
+        if (node->data < minValue || node->data > maxValue)
+        {
+            return false;
+        }
+
+        return isBinaryTree(node->left, minValue, node->data - 1) &&
+            isBinaryTree(node->right, node->data + 1, maxValue);
+    }
+
+    bool isValidInputChar(char ch)
+    {
+        return isdigit(ch) || ch == '(' || ch == ')' || ch == ' ';
+    }
+
+    void buildTreeFromString(const string& str)
+    {
+        stringstream ss(str);
+        if (!isValidInput(ss.str()))
+        {
+            cerr << "Invalid input format." << endl;
+            return;
+        }
+
+        buildTree(ss, root);
+    }
+
+    bool isValidInput(const string& str)
+    {
+        for (char ch : str)
+        {
+            if (!isValidInputChar(ch))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void buildTree(stringstream& ss, Node*& node)
+    {
+        char ch;
+        ss >> ch;
+
+        // крафтим корень
+        int value;
+        ss >> value;
+        node = new Node(value);
+
+        if (ss.eof() || ss.peek() == ')')
+        {
+            ss >> ch; // считываем )
+            return;
+        }
+
+        buildTree(ss, node->left);
+
+        if (ss.eof() || ss.peek() == ')')
+        {
+            ss >> ch; // считываем )
+            return;
+        }
+
+        buildTree(ss, node->right);
+
+        ss >> ch; // считываем )
+    }
+
+    void DFS(Node* node)
+    {
+        if (node == nullptr)
+        {
+            return;
+        }
+
+        cout << node->data << " ";
+
+        DFS(node->left);
+        DFS(node->right);
+    }
+
+    void PrintDFS()
+    {
+        DFS(root);
+        cout << "\n";
+    }
+
+    bool isValidBinaryTree()
+    {
+        return isBinaryTree(root, INT_MIN, INT_MAX);
     }
 };
 
@@ -117,20 +160,21 @@ int main()
 {
     BinaryTree tree;
     string inputString;
-    ifstream inputFile("C:\\Users\\83532\\source\\repos\\OOP_pw1\\Project2\\test.txt"); 
+    ifstream inputFile("C:\\Users\\83532\\source\\repos\\OOP_pw1\\Project2\\test.txt");
+    string line;
+    getline(inputFile, line);
 
+    if (!tree.isValidInput(line))
+    {
+        cerr << "Invalid input format." << endl;
+        return 1;
+    }
 
-    if (inputFile.is_open())
-    {
-        getline(inputFile, inputString);
-        inputFile.close();
-        tree.ReadString(inputString);
-        tree.depthFirstSearch();
-    }
-    else
-    {
-        cout << "Unable to open file" << endl;
-    }
+    tree.buildTreeFromString(line);
+
+    
+
+    tree.PrintDFS();
 
     return 0;
 }
