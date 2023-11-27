@@ -26,13 +26,18 @@ public:
 class AVLNode
 {
 public:
+    AVLNode() 
+    {
+        this->key = key;
+        height = 0;
+        Left = nullptr ;
+        Right = nullptr;
+
+    }   
     int key;
     int height;
     AVLNode* Left;
     AVLNode* Right;
-
-    AVLNode() : key(0), height(1), Left(nullptr), Right(nullptr) {}
-    AVLNode(int k) : key(k), height(1), Left(nullptr), Right(nullptr) {}
 };
 
 
